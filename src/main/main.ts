@@ -14,6 +14,7 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import Proxy from './proxy';
 
 class AppUpdater {
   constructor() {
@@ -21,6 +22,10 @@ class AppUpdater {
     autoUpdater.logger = log;
     autoUpdater.checkForUpdatesAndNotify();
   }
+}
+
+function init() {
+  Proxy.createProxy();
 }
 
 let mainWindow: BrowserWindow | null = null;
@@ -129,6 +134,7 @@ app
   .whenReady()
   .then(() => {
     createWindow();
+    init();
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
