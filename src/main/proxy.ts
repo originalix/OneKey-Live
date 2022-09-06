@@ -7,22 +7,6 @@ import { postMessage, listenRendererMessages, setMainWindow } from './messages';
 
 listenRendererMessages();
 
-// const messageId = 1;
-// const messagesCallback: Record<number, any> = {};
-// function getResponse() {
-// return new Promise((resolve, reject) => {
-//   console.log('send hardware-sdk');
-//   messagesCallback[messageId] = (response: any) => {
-//     if (response.success) {
-//       resolve(response);
-//     } else {
-//       reject(response);
-//     }
-//   };
-//   mainWindow.webContents.send('hardware-sdk', { data: 1, messageId });
-// });
-// }
-
 function createProxy() {
   const PORT = 8321;
   const app = express();
@@ -32,9 +16,7 @@ function createProxy() {
   // Http Proxy
   app.use(cors());
   app.get('/', async (_, res) => {
-    const result = await postMessage({ data: 1111 });
-    console.log('$$$$$ result: ', result);
-    console.log('get / request result: ', result);
+    const result = await postMessage();
     res.json(result);
   });
 

@@ -1,10 +1,20 @@
+import { useEffect } from 'react';
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import icon from '../../assets/icon.svg';
 import './App.css';
 import { ISendMessage } from '../types';
-import { createResponseMessage } from '../events';
+import { createResponseMessage } from '../event';
+import { serviceHardware } from './hardware';
 
 const Hello = () => {
+  useEffect(() => {
+    console.log('effect mount');
+    const create = async () => {
+      const ins = await serviceHardware.getSDKInstance();
+      console.log(ins);
+    };
+    create();
+  }, []);
   return (
     <div>
       <div className="Hello">
