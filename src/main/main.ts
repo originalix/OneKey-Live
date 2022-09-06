@@ -24,15 +24,14 @@ class AppUpdater {
   }
 }
 
+let mainWindow: BrowserWindow | null = null;
+
 function init() {
   Proxy.createProxy();
 }
 
-let mainWindow: BrowserWindow | null = null;
-
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));
 });
 
@@ -103,6 +102,10 @@ const createWindow = async () => {
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
+
+  if (mainWindow) {
+    Proxy.setMainWindow(mainWindow);
+  }
 
   const menuBuilder = new MenuBuilder(mainWindow);
   menuBuilder.buildMenu();

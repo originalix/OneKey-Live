@@ -36,5 +36,10 @@ contextBridge.exposeInMainWorld('hardwareSDK', {
     once(channel: HardwareChannel, func: (...args: unknown[]) => void) {
       ipcRenderer.once(channel, (_event, ...args) => func(...args));
     },
+    async invoke(channel: HardwareChannel, args: unknown[]) {
+      const result = await ipcRenderer.invoke(channel, args);
+      console.log('preload get invoke result: ', result);
+      return result;
+    },
   },
 });

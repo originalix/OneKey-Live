@@ -14,6 +14,31 @@ function setMainWindow(window: BrowserWindow) {
   mainWindow = window;
 }
 
+const messageId = 1;
+const messagesCallback: Record<number, any> = {};
+function getResponse() {
+  return new Promise((resolve, reject) => {
+    console.log('send hardware-sdk');
+    messagesCallback[messageId] = (response: any) => {
+      if (response.success) {
+        resolve(response);
+      } else {
+        reject(response);
+      }
+    };
+    mainWindow.webContents.send('hardware-sdk', { data: 1, messageId });
+  });
+}
+
+ipcMain.handle('hardware-sdk', (event, args) => {
+  console.log(event);
+  console.log(args);
+  if (args.messageId && messagesCallback[args.messageId]) {
+    messagesCallback[args.messageId](args);
+  }
+  return { success: true };
+});
+
 function createProxy() {
   const PORT = 8321;
   const app = express();
@@ -22,9 +47,10 @@ function createProxy() {
 
   // Http Proxy
   app.use(cors());
-  app.get('/', (_, res) => {
-    mainWindow.webContents.send('hardware-sdk', { data: 1 });
-    res.sendStatus(200);
+  app.get('/', async (_, res) => {
+    const result = await getResponse();
+    console.log('get / request result: ', result);
+    res.json(result);
   });
 
   let pending = false;
