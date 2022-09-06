@@ -3,41 +3,25 @@ import express from 'express';
 import bodyParse from 'body-parser';
 import cors from 'cors';
 import WebSocket from 'ws';
+import { postMessage, listenRendererMessages, setMainWindow } from './messages';
 
-import { ipcMain, BrowserWindow } from 'electron';
+listenRendererMessages();
 
-ipcMain.on('hardware-sdk', (event) => {
-  console.log('hardware sdk listener : ', event);
-});
-let mainWindow: BrowserWindow;
-function setMainWindow(window: BrowserWindow) {
-  mainWindow = window;
-}
-
-const messageId = 1;
-const messagesCallback: Record<number, any> = {};
-function getResponse() {
-  return new Promise((resolve, reject) => {
-    console.log('send hardware-sdk');
-    messagesCallback[messageId] = (response: any) => {
-      if (response.success) {
-        resolve(response);
-      } else {
-        reject(response);
-      }
-    };
-    mainWindow.webContents.send('hardware-sdk', { data: 1, messageId });
-  });
-}
-
-ipcMain.handle('hardware-sdk', (event, args) => {
-  console.log(event);
-  console.log(args);
-  if (args.messageId && messagesCallback[args.messageId]) {
-    messagesCallback[args.messageId](args);
-  }
-  return { success: true };
-});
+// const messageId = 1;
+// const messagesCallback: Record<number, any> = {};
+// function getResponse() {
+// return new Promise((resolve, reject) => {
+//   console.log('send hardware-sdk');
+//   messagesCallback[messageId] = (response: any) => {
+//     if (response.success) {
+//       resolve(response);
+//     } else {
+//       reject(response);
+//     }
+//   };
+//   mainWindow.webContents.send('hardware-sdk', { data: 1, messageId });
+// });
+// }
 
 function createProxy() {
   const PORT = 8321;
@@ -48,7 +32,8 @@ function createProxy() {
   // Http Proxy
   app.use(cors());
   app.get('/', async (_, res) => {
-    const result = await getResponse();
+    const result = await postMessage({ data: 1111 });
+    console.log('$$$$$ result: ', result);
     console.log('get / request result: ', result);
     res.json(result);
   });

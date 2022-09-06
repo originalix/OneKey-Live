@@ -775,6 +775,11 @@
     mkdirp "^1.0.4"
     rimraf "^3.0.2"
 
+"@onekeyfe/hd-shared@^0.1.43":
+  version "0.1.43"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/hd-shared/-/hd-shared-0.1.43.tgz#42497ffbec32170cfd046fe95086edf557848b4d"
+  integrity sha512-m99cq8mZyRRFJm1V5MNrE68wxc1RWCuYoTHsMW//gIUXGkQ5JPhQbz+MmEcamEgR1F53ItO7IBH3/rY9jXCCrw==
+
 "@pkgr/utils@^2.3.1":
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/@pkgr/utils/-/utils-2.3.1.tgz#0a9b06ffddee364d6642b3cd562ca76f55b34a03"

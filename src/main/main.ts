@@ -15,6 +15,7 @@ import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import Proxy from './proxy';
+import { setMainWindow } from './messages';
 
 class AppUpdater {
   constructor() {
@@ -104,7 +105,7 @@ const createWindow = async () => {
   });
 
   if (mainWindow) {
-    Proxy.setMainWindow(mainWindow);
+    setMainWindow(mainWindow);
   }
 
   const menuBuilder = new MenuBuilder(mainWindow);

@@ -1,7 +1,8 @@
-import { truncate } from 'fs';
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import icon from '../../assets/icon.svg';
 import './App.css';
+import { ISendMessage } from '../types';
+import { createResponseMessage } from '../events';
 
 const Hello = () => {
   return (
@@ -16,16 +17,23 @@ const Hello = () => {
 
 export default function App() {
   console.log(window.hardwareSDK.ipcRenderer);
-  window.hardwareSDK.ipcRenderer.on('hardware-sdk', async (e: any) => {
-    console.log(e);
-    // Mock do something
-    const ret = await window.hardwareSDK.ipcRenderer.invoke('hardware-sdk', {
-      success: true,
-      messageId: e.messageId,
-      payload: { data: 1 },
-    } as any);
-    console.log('app ret: ', ret);
-  });
+  window.hardwareSDK.ipcRenderer.on(
+    'hardware-sdk',
+    async (message: ISendMessage) => {
+      // Mock do something
+      if (message.messageType !== 'Send') {
+        return;
+      }
+      const response = createResponseMessage(message.id ?? -1, true, {
+        tag: 1,
+      });
+      const ret = await window.hardwareSDK.ipcRenderer.invoke(
+        'hardware-sdk',
+        response
+      );
+      console.log('app ret: ', ret);
+    }
+  );
   return (
     <Router>
       <Routes>

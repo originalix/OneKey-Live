@@ -1,4 +1,5 @@
 import { Channels, HardwareChannel } from 'main/preload';
+import { IReceiveMessage, ISendMessage } from 'types';
 
 declare global {
   interface Window {
@@ -14,13 +15,13 @@ declare global {
     };
     hardwareSDK: {
       ipcRenderer: {
-        sendMessage(channel: Channels, args: unknown[]): void;
+        sendMessage(channel: Channels, message: ISendMessage): void;
         on(
           channel: string,
-          func: (...args: unknown[]) => void
+          func: (message: ISendMessage) => void
         ): (() => void) | undefined;
         once(channel: string, func: (...args: unknown[]) => void): void;
-        invoke(channel: HardwareChannel, args: unknown[]): void;
+        invoke(channel: HardwareChannel, message: IReceiveMessage): void;
       };
     };
   }

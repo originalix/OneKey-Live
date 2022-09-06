@@ -5,6 +5,8 @@ module.exports = {
     'import/no-extraneous-dependencies': 'off',
     'import/no-unresolved': 'error',
     'no-console': 'off',
+    'consistent-return': 'off',
+    'import/prefer-default-export': 'off',
     // Since React 17 and typescript 4.1 you can safely disable the rule
     'react/react-in-jsx-scope': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
