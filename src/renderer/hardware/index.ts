@@ -1,10 +1,21 @@
 import { createDeferred, Deferred } from '@onekeyfe/hd-shared';
-import { SearchDevice, Success, Unsuccessful } from '@onekeyfe/hd-core';
+import {
+  CoreMessage,
+  SearchDevice,
+  Success,
+  UI_EVENT,
+  Unsuccessful,
+  UiResponseEvent,
+} from '@onekeyfe/hd-core';
 import { getHardwareSDKInstance } from './instance';
+import { store } from '../store';
+import { setHardwareEvent } from '../store/reducers/ui-response';
 
 let searchPromise: Deferred<void> | null = null;
 class ServiceHardware {
   scanMap: Record<string, boolean> = {};
+
+  registeredEvents = false;
 
   isSearch = false;
 
@@ -12,6 +23,26 @@ class ServiceHardware {
 
   async getSDKInstance() {
     return getHardwareSDKInstance().then((instance) => {
+      if (!this.registeredEvents) {
+        instance.on(UI_EVENT, (message: CoreMessage) => {
+          const { type, payload } = message;
+          const { device, type: eventType } = payload || {};
+          const { deviceType, connectId, deviceId } = device || {};
+
+          store.dispatch(
+            setHardwareEvent({
+              uiRequest: type,
+              payload: {
+                type: eventType,
+                deviceType,
+                deviceId,
+                deviceConnectId: connectId,
+              },
+            })
+          );
+        });
+      }
+
       return instance;
     });
   }
@@ -71,6 +102,10 @@ class ServiceHardware {
     const response = await hardwareSDK?.getFeatures(connectId);
 
     return response;
+  }
+
+  async sendUiResponse(response: UiResponseEvent) {
+    return (await this.getSDKInstance()).uiResponse(response);
   }
 }
 

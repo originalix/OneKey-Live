@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
 import { Card } from '@onekeyhq/ui-components';
 import type { RootState } from '../store';
-import { SearchDevices } from '../components';
+import { SearchDevices, UiRequest } from '../components';
 
 export default function Dashboard() {
   const device = useSelector((state: RootState) => state.runtime.device);
@@ -17,6 +17,7 @@ export default function Dashboard() {
           Current Select Device: {device?.label}
         </div>
       </Card>
+      <UiRequest />
     </div>
   );
 }

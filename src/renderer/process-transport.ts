@@ -10,7 +10,6 @@ const getDevice = () => store.getState().runtime.device;
 let devicePromise: Deferred<void> | null = null;
 
 async function invokeResponse(message: ISendMessage, response: any) {
-  // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve) => {
     const responseMessage = createResponseMessage(
       message.id ?? 0,
@@ -40,7 +39,11 @@ function addIpcListener() {
       if (!device) {
         console.log('need get device');
         devicePromise = createDeferred();
-        await devicePromise?.promise;
+        try {
+          await devicePromise?.promise;
+        } catch (e) {
+          // TODO: search device error
+        }
         device = getDevice();
       }
 
@@ -55,7 +58,7 @@ function addIpcListener() {
           console.log('getFeatures call ======> ');
           const response = await HardwareSDK.getFeatures(device.connectId);
           await invokeResponse(message, response);
-          break;
+          return;
         }
         case 'evmGetAddress': {
           const response = await HardwareSDK.evmGetAddress(
@@ -64,7 +67,7 @@ function addIpcListener() {
             { ...message.payload.params }
           );
           await invokeResponse(message, response);
-          break;
+          return;
         }
 
         default: {
@@ -72,7 +75,6 @@ function addIpcListener() {
             error: 'not found method',
           });
           await invokeResponse(message, response);
-          break;
         }
       }
     }

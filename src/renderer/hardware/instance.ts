@@ -7,7 +7,6 @@ let initialized = false;
 
 export const getHardwareSDKInstance = memoizee(
   async () => {
-    // eslint-disable-next-line no-async-promise-executor
     return new Promise<CoreApi>(async (resolve, reject) => {
       if (initialized) {
         resolve(HardwareSDK);
