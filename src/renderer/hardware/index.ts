@@ -1,3 +1,4 @@
+// import { createDeferred, Deferred } from '@onekeyfe/hd-shared';
 import { getHardwareSDKInstance } from './instance';
 
 class ServiceHardware {
@@ -5,6 +6,11 @@ class ServiceHardware {
     return getHardwareSDKInstance().then((instance) => {
       return instance;
     });
+  }
+
+  async searchDevices() {
+    const hardwareSDK = await this.getSDKInstance();
+    return hardwareSDK?.searchDevices();
   }
 }
 

@@ -9,9 +9,10 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, session } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import isDev from 'electron-is-dev';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import Proxy from './proxy';
@@ -80,6 +81,7 @@ const createWindow = async () => {
     height: 728,
     icon: getAssetPath('icon.png'),
     webPreferences: {
+      // webSecurity: false,
       sandbox: false,
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
@@ -107,6 +109,25 @@ const createWindow = async () => {
   if (mainWindow) {
     setMainWindow(mainWindow);
   }
+
+  // Configuring Request Headers for OneKey Bridge
+  if (!isDev) {
+    const filter = {
+      urls: ['http://127.0.0.1:21320/*', 'http://localhost:21320/*'],
+    };
+
+    const origin = 'https://jssdk.onekey.so';
+    session.defaultSession.webRequest.onBeforeSendHeaders(
+      filter,
+      (details, callback) => {
+        callback({
+          requestHeaders: {
+            ...details.requestHeaders,
+            Origin: origin,
+          },
+        });
+      }
+    );
 
   const menuBuilder = new MenuBuilder(mainWindow);
   menuBuilder.buildMenu();

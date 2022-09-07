@@ -10,8 +10,9 @@ const Hello = () => {
   useEffect(() => {
     console.log('effect mount');
     const create = async () => {
-      const ins = await serviceHardware.getSDKInstance();
-      console.log(ins);
+      // const ins = await serviceHardware.getSDKInstance();
+      // console.log(ins);
+      await serviceHardware.searchDevices();
     };
     create();
   }, []);
