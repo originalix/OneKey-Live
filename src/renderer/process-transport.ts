@@ -25,39 +25,60 @@ async function invokeResponse(message: ISendMessage, response: any) {
   });
 }
 
-window.hardwareSDK.ipcRenderer.on(
-  'hardware-sdk',
-  async (message: ISendMessage) => {
-    if (message.messageType !== 'Send') {
-      return;
-    }
-
-    // get runtime device
-    let device = getDevice();
-    if (!device) {
-      console.log('need get device');
-      devicePromise = createDeferred();
-      await devicePromise?.promise;
-      device = getDevice();
-    }
-
-    if (!device?.connectId) {
-      return;
-    }
-
-    console.log('store: ', store);
-    // call method
-    switch (message.payload.method) {
-      case 'getFeatures': {
-        const response = await serviceHardware.getFeatures(device.connectId);
-        await invokeResponse(message, response);
-        break;
+function addIpcListener() {
+  const subscription = window.hardwareSDK.ipcRenderer.on(
+    'hardware-sdk',
+    async (message: ISendMessage) => {
+      if (message.messageType !== 'Send') {
+        return;
       }
 
-      default:
-        break;
-    }
-  }
-);
+      console.log('ipcrenderer received message');
 
-export { devicePromise };
+      // get runtime device
+      let device = getDevice();
+      if (!device) {
+        console.log('need get device');
+        devicePromise = createDeferred();
+        await devicePromise?.promise;
+        device = getDevice();
+      }
+
+      if (!device?.connectId) {
+        return;
+      }
+
+      // call method
+      const HardwareSDK = await serviceHardware.getSDKInstance();
+      switch (message.payload.method) {
+        case 'getFeatures': {
+          console.log('getFeatures call ======> ');
+          const response = await HardwareSDK.getFeatures(device.connectId);
+          await invokeResponse(message, response);
+          break;
+        }
+        case 'evmGetAddress': {
+          const response = await HardwareSDK.evmGetAddress(
+            device.connectId,
+            device?.deviceId ?? '',
+            { ...message.payload.params }
+          );
+          await invokeResponse(message, response);
+          break;
+        }
+
+        default: {
+          const response = createResponseMessage(message.id ?? 0, false, {
+            error: 'not found method',
+          });
+          await invokeResponse(message, response);
+          break;
+        }
+      }
+    }
+  );
+
+  return subscription;
+}
+
+export { devicePromise, addIpcListener };
