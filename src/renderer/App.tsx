@@ -1,33 +1,10 @@
-import { useEffect } from 'react';
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
-import icon from '../../assets/icon.svg';
 import './App.css';
 import { ISendMessage } from '../types';
 import { createResponseMessage } from '../event';
-import { serviceHardware } from './hardware';
-
-const Hello = () => {
-  useEffect(() => {
-    console.log('effect mount');
-    const create = async () => {
-      // const ins = await serviceHardware.getSDKInstance();
-      // console.log(ins);
-      await serviceHardware.searchDevices();
-    };
-    create();
-  }, []);
-  return (
-    <div>
-      <div className="Hello">
-        <img width="200" alt="icon" src={icon} />
-      </div>
-      <h1>OneKey Live 2</h1>
-    </div>
-  );
-};
+import Dashboard from './views/Dashboard';
 
 export default function App() {
-  console.log(window.hardwareSDK.ipcRenderer);
   window.hardwareSDK.ipcRenderer.on(
     'hardware-sdk',
     async (message: ISendMessage) => {
@@ -48,7 +25,7 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Hello />} />
+        <Route path="/" element={<Dashboard />} />
       </Routes>
     </Router>
   );
