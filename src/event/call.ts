@@ -1,3 +1,4 @@
+import { RESPONSE_EVENT } from '@onekeyfe/hd-core';
 import { IReceiveMessage } from '../types';
 
 export const createResponseMessage = (
@@ -5,8 +6,8 @@ export const createResponseMessage = (
   success: boolean,
   payload: any
 ): IReceiveMessage => ({
-  event: 'fake event',
-  type: 'fake type',
+  event: RESPONSE_EVENT,
+  type: RESPONSE_EVENT,
   id,
   success,
   payload,

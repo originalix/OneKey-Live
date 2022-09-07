@@ -22,9 +22,9 @@ function createProxy() {
 
   let pending = false;
   // eslint-disable-next-line consistent-return
-  app.post('/', bodyParse.json(), (req, res) => {
+  app.post('/', bodyParse.json(), async (req, res) => {
+    console.log(req.body);
     if (!req.body) return res.sendStatus(400);
-    const data = null;
     const error: Error | null = null;
 
     if (pending) {
@@ -35,10 +35,14 @@ function createProxy() {
 
     pending = true;
 
-    // TODO: 与 SDK 交互部分
-    // SDK 可以使用 node-sdk，这边直接通信，返回结果
-
-    res.sendStatus(200).json({ success: true, payload: { data: 0 } });
+    try {
+      const result = await postMessage(req.body);
+      return res.json({ ...result });
+    } catch (err) {
+      return res.sendStatus(400).json({ error });
+    } finally {
+      pending = false;
+    }
   });
 
   // WebSocket Proxy

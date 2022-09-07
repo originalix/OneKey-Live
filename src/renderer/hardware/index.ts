@@ -70,14 +70,7 @@ class ServiceHardware {
     const hardwareSDK = await this.getSDKInstance();
     const response = await hardwareSDK?.getFeatures(connectId);
 
-    if (response.success) {
-      return response.payload;
-    }
-
-    // const deviceError = deviceUtils.convertDeviceError(response.payload);
-
-    // return Promise.reject(deviceError);
-    return Promise.reject(response.payload);
+    return response;
   }
 }
 
