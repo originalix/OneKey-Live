@@ -1,7 +1,15 @@
-// import { createDeferred, Deferred } from '@onekeyfe/hd-shared';
+import { createDeferred, Deferred } from '@onekeyfe/hd-shared';
+import { SearchDevice, Success, Unsuccessful } from '@onekeyfe/hd-core';
 import { getHardwareSDKInstance } from './instance';
 
+let searchPromise: Deferred<void> | null = null;
 class ServiceHardware {
+  scanMap: Record<string, boolean> = {};
+
+  isSearch = false;
+
+  timer: ReturnType<typeof setInterval> | null = null;
+
   async getSDKInstance() {
     return getHardwareSDKInstance().then((instance) => {
       return instance;
@@ -11,6 +19,51 @@ class ServiceHardware {
   async searchDevices() {
     const hardwareSDK = await this.getSDKInstance();
     return hardwareSDK?.searchDevices();
+  }
+
+  async startDeviceScan(
+    callback: (searchResponse: Unsuccessful | Success<SearchDevice[]>) => void,
+    onSearchStateChange: (state: 'start' | 'stop') => void
+  ) {
+    const searchDevices = async () => {
+      if (searchPromise) {
+        await searchPromise.promise;
+        console.log('search throttling, await search promise and return');
+        return;
+      }
+
+      searchPromise = createDeferred();
+      onSearchStateChange('start');
+
+      let searchResponse;
+      try {
+        searchResponse = await this.searchDevices();
+      } finally {
+        searchPromise?.resolve();
+        searchPromise = null;
+        console.log('search finished, reset searchPromise');
+      }
+
+      callback(searchResponse as any);
+
+      onSearchStateChange('stop');
+      return searchResponse;
+    };
+
+    this.timer = setInterval(async () => {
+      if (!this.isSearch && this.timer) {
+        clearInterval(this.timer);
+        return;
+      }
+      await searchDevices();
+    }, 3000);
+
+    this.isSearch = true;
+    await searchDevices();
+  }
+
+  stopScan() {
+    this.isSearch = false;
   }
 }
 
