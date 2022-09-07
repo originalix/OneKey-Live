@@ -65,6 +65,20 @@ class ServiceHardware {
   stopScan() {
     this.isSearch = false;
   }
+
+  async getFeatures(connectId: string) {
+    const hardwareSDK = await this.getSDKInstance();
+    const response = await hardwareSDK?.getFeatures(connectId);
+
+    if (response.success) {
+      return response.payload;
+    }
+
+    // const deviceError = deviceUtils.convertDeviceError(response.payload);
+
+    // return Promise.reject(deviceError);
+    return Promise.reject(response.payload);
+  }
 }
 
 export default ServiceHardware;

@@ -6,7 +6,7 @@ import { store } from './store';
 export default function AppProvider() {
   return (
     // @ts-expect-error
-    <UIProvider defaultTheme="dark">
+    <UIProvider defaultTheme="light">
       <Provider store={store}>
         <App />
       </Provider>
