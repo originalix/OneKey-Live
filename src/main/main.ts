@@ -83,6 +83,7 @@ export const getMainWindowAsync: (
 app.on('will-finish-launching', () => {
   // macOS deepLink
   app.on('open-url', (event, url) => {
+    console.log('Apple DeepLink: ', url);
     event.preventDefault();
     getMainWindowAsync()
       .then((w) => {

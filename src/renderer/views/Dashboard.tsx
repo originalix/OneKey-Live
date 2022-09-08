@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Card, Button } from '@onekeyhq/ui-components';
 import type { RootState } from '../store';
@@ -7,6 +8,19 @@ import { setDevice } from '../store/reducers/runtime';
 export default function Dashboard() {
   const device = useSelector((state: RootState) => state.runtime.device);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    const subscription = window.hardwareSDK.ipcRenderer.on(
+      'deep-linking',
+      () => {
+        console.log('deep-linking message');
+      }
+    );
+
+    return () => {
+      subscription?.();
+    };
+  }, []);
 
   if (!device) {
     return <SearchDevices />;
