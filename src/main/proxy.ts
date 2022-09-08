@@ -25,11 +25,14 @@ function createProxy() {
   app.post('/', bodyParse.json(), async (req, res) => {
     console.log(req.body);
     if (!req.body) return res.sendStatus(400);
-    const error: Error | null = null;
 
     if (pending) {
-      return res.sendStatus(400).json({
-        error: 'a method was already pending',
+      return res.status(400).json({
+        success: false,
+        payload: {
+          error: 'a method was already pending',
+          code: 0,
+        },
       });
     }
 
@@ -39,7 +42,7 @@ function createProxy() {
       const result = await postMessage(req.body);
       return res.json({ ...result });
     } catch (err) {
-      return res.sendStatus(400).json({ error });
+      return res.status(400).json({ err });
     } finally {
       pending = false;
     }

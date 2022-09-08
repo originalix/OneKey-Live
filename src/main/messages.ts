@@ -38,11 +38,7 @@ function listenRendererMessages() {
 
     if (message.id) {
       const promise = promiseMap[message.id];
-      if (message.success) {
-        promise?.resolve(message);
-      } else {
-        promise?.reject(message.payload?.error);
-      }
+      promise.resolve(message);
     }
 
     return { success: true, type: 'receive invoke message' };
