@@ -182,8 +182,12 @@
     "webpack-merge": "^5.8.0"
   },
   "build": {
-    "productName": "ElectronReact",
+    "productName": "OneKeyLive",
     "appId": "org.erb.ElectronReact",
+    "protocols": {
+      "name": "OneKeyLive",
+      "schemes": ["onekeylive"]
+    },
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
     "files": [

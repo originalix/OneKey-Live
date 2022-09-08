@@ -14,7 +14,7 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import isDev from 'electron-is-dev';
 import MenuBuilder from './menu';
-import { resolveHtmlPath } from './util';
+import { resolveHtmlPath, delay } from './util';
 import Proxy from './proxy';
 import { setMainWindow } from './messages';
 
@@ -27,6 +27,75 @@ class AppUpdater {
 }
 
 let mainWindow: BrowserWindow | null = null;
+
+export const getMainWindow = () => mainWindow;
+
+// set deep link protocol
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient('onekeylive', process.execPath, [
+      path.resolve(process.argv[1]),
+    ]);
+  }
+} else {
+  app.setAsDefaultProtocolClient('onekeylive');
+}
+
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on('second-instance', (_, commandLine) => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.focus();
+
+      // Deep linking for when the app is already running (Windows, Linux)
+      if (process.platform === 'win32' || process.platform === 'linux') {
+        const uri = commandLine.filter((arg) => arg.startsWith('onekey://'));
+
+        if (uri.length) {
+          if ('send' in mainWindow?.webContents) {
+            mainWindow?.webContents.send('deep-linking', uri[0]);
+          }
+        }
+      }
+    }
+  });
+}
+
+export const getMainWindowAsync: (
+  maxTries?: number
+) => Promise<BrowserWindow> = async (maxTries = 5) => {
+  if (maxTries <= 0) {
+    throw new Error('could not get the mainWindow');
+  }
+
+  if (!mainWindow) {
+    await delay(2000);
+    return getMainWindowAsync(maxTries - 1);
+  }
+
+  return mainWindow;
+};
+
+app.on('will-finish-launching', () => {
+  // macOS deepLink
+  app.on('open-url', (event, url) => {
+    event.preventDefault();
+    getMainWindowAsync()
+      .then((w) => {
+        if (w) {
+          show(w);
+          if ('send' in w.webContents) {
+            w.webContents.send('deep-linking', url);
+          }
+        }
+      })
+      .catch((err) => console.log(err));
+  });
+});
 
 function init() {
   Proxy.createProxy();
@@ -163,3 +232,8 @@ app
     });
   })
   .catch(console.log);
+
+function show(win: BrowserWindow) {
+  win.show();
+  setImmediate(() => win.focus());
+}

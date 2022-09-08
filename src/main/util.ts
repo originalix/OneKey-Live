@@ -11,3 +11,7 @@ export function resolveHtmlPath(htmlFileName: string) {
   }
   return `file://${path.resolve(__dirname, '../renderer/', htmlFileName)}`;
 }
+
+export const delay = (ms: number): Promise<void> =>
+  // eslint-disable-next-line promise/param-names
+  new Promise((f) => setTimeout(f, ms));
