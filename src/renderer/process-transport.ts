@@ -1,6 +1,7 @@
 import { createDeferred, Deferred } from '@onekeyfe/hd-shared';
 import { ISendMessage } from '../types';
 import { store } from './store';
+import { setMethodState } from './store/reducers/runtime';
 import { serviceHardware } from './hardware';
 import { createResponseMessage } from '../event';
 
@@ -21,6 +22,7 @@ async function invokeResponse(message: ISendMessage, response: any) {
       responseMessage
     );
     resolve(result);
+    setTimeout(() => store.dispatch(setMethodState('empty')), 1500);
   });
 }
 
@@ -36,6 +38,7 @@ function addIpcListener() {
 
       // get runtime device
       let device = getDevice();
+      store.dispatch(setMethodState('processing'));
       if (!device) {
         console.log('need get device');
         devicePromise = createDeferred();
@@ -48,35 +51,38 @@ function addIpcListener() {
       }
 
       if (!device?.connectId) {
+        store.dispatch(setMethodState('failed'));
         return;
       }
 
+      console.log('call Method $$$$$$44========>>>');
+
+      let response;
       // call method
       const HardwareSDK = await serviceHardware.getSDKInstance();
       switch (message.payload.method) {
         case 'getFeatures': {
           console.log('getFeatures call ======> ');
-          const response = await HardwareSDK.getFeatures(device.connectId);
-          await invokeResponse(message, response);
-          return;
+          response = await HardwareSDK.getFeatures(device.connectId);
+          break;
         }
         case 'evmGetAddress': {
-          const response = await HardwareSDK.evmGetAddress(
+          response = await HardwareSDK.evmGetAddress(
             device.connectId,
             device?.deviceId ?? '',
             { ...message.payload.params }
           );
-          await invokeResponse(message, response);
-          return;
+          break;
         }
 
         default: {
-          const response = createResponseMessage(message.id ?? 0, false, {
+          response = createResponseMessage(message.id ?? 0, false, {
             error: 'not found method',
           });
-          await invokeResponse(message, response);
         }
       }
+      store.dispatch(setMethodState(response.success ? 'success' : 'failed'));
+      await invokeResponse(message, response);
     }
   );
 

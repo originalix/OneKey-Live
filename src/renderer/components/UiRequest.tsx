@@ -73,15 +73,21 @@ function UiRequest() {
       content = 'Please confirm on your device';
       break;
     }
+    case UI_REQUEST.CLOSE_UI_WINDOW: {
+      content = '';
+      break;
+    }
     default: {
       content = 'Please confirm on your device';
       break;
     }
   }
 
+  if (!content) return null;
+
   return (
     // @ts-expect-error
-    <Alert title="Tips" type="success">
+    <Alert title="UI Request" type="success">
       <p>{content}</p>
     </Alert>
   );

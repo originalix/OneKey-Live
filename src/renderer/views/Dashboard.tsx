@@ -1,7 +1,7 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { Card, Button } from '@onekeyhq/ui-components';
 import type { RootState } from '../store';
-import { SearchDevices, UiRequest } from '../components';
+import { SearchDevices, UiRequest, MethodState } from '../components';
 import { setDevice } from '../store/reducers/runtime';
 
 export default function Dashboard() {
@@ -27,6 +27,9 @@ export default function Dashboard() {
           </Button>
         </div>
       </Card>
+      <div className="okd-mb-2">
+        <MethodState />
+      </div>
       <UiRequest />
     </div>
   );

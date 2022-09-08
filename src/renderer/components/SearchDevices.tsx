@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Button, Card } from '@onekeyhq/ui-components';
 import { KnownDevice, SearchDevice } from '@onekeyfe/hd-core';
@@ -28,6 +28,14 @@ export default function SearchDevices() {
       () => {}
     );
   }, []);
+
+  useEffect(() => {
+    handleSearchDevice();
+    return () => {
+      serviceHardware.stopScan();
+    };
+  }, [handleSearchDevice]);
+
   return (
     <div>
       <Button
