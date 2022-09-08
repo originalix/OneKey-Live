@@ -10,6 +10,7 @@ module.exports = {
     'class-methods-use-this': 'off',
     'no-async-promise-executor': 'off',
     'no-use-before-define': 'off',
+    'promise/always-return': 'off',
     '@typescript-eslint/no-use-before-define': 'off',
     // Since React 17 and typescript 4.1 you can safely disable the rule
     'react/react-in-jsx-scope': 'off',
