@@ -1,22 +1,60 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Alert } from '@onekeyhq/ui-components';
 import { UI_REQUEST, UI_RESPONSE } from '@onekeyfe/hd-core';
 import { serviceHardware } from 'renderer/hardware';
 import type { RootState } from '../store';
 
+let lastParams = '';
+let lastCallTime = 0;
+
 function UiRequest() {
   const uiEvent = useSelector((state: RootState) => state.uiResponse.event);
+  const prevUiEvent = useRef('');
 
   useEffect(() => {
-    console.log('rerender uiRequest ========>>>>> ');
+    prevUiEvent.current = uiEvent?.uiRequest ?? '';
   }, [uiEvent]);
 
   if (!uiEvent) {
     return null;
   }
 
-  if (uiEvent.uiRequest === UI_REQUEST.CLOSE_UI_WINDOW) {
+  const currentCallTime = Date.now();
+  const currentParams = JSON.stringify({
+    uiRequest: uiEvent.uiRequest,
+    payload: uiEvent.payload,
+  });
+
+  if (currentCallTime - lastCallTime < 1000 && lastParams === currentParams) {
+    // ignore frequent calls
+    return null;
+  }
+
+  lastCallTime = currentCallTime;
+  lastParams = currentParams;
+
+  if (
+    [UI_REQUEST.REQUEST_PIN, UI_REQUEST.REQUEST_BUTTON].includes(
+      prevUiEvent.current as unknown as any
+    ) &&
+    uiEvent.uiRequest === UI_REQUEST.CLOSE_UI_WINDOW
+  ) {
+    try {
+      const connectId = uiEvent.payload?.deviceConnectId ?? '';
+      serviceHardware
+        .getSDKInstance()
+        .then((instance) => {
+          instance.cancel(connectId);
+          // if (prevUiEvent.current === UI_REQUEST.REQUEST_PIN) {
+          //   instance.getFeatures(connectId);
+          // }
+          return true;
+        })
+        .catch(() => {});
+    } catch {
+      // Empty
+    }
     return null;
   }
 
