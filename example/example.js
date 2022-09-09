@@ -171,13 +171,13 @@ async function sendSocketMessage(params) {
 }
 
 async function getFeaturesBySocket() {
-  await makeApp();
+  await makeApp(false);
   const response = await sendSocketMessage({ method: 'getFeatures' });
   alert(JSON.stringify(response));
 }
 
 async function evmGetAddressBySocket() {
-  await makeApp();
+  await makeApp(false);
   const response = await sendSocketMessage({
     method: 'evmGetAddress',
     params: {
