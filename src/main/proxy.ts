@@ -3,9 +3,16 @@ import express from 'express';
 import bodyParse from 'body-parser';
 import cors from 'cors';
 import WebSocket from 'ws';
-import { postMessage, listenRendererMessages, setMainWindow } from './messages';
+import HardwareSDK from '@onekeyfe/hd-common-connect-sdk';
+import { getSDKVersion } from '@onekeyfe/hd-core';
+import { postMessage, listenRendererMessages } from './messages';
 
 listenRendererMessages();
+
+let pending = false;
+function setPending(state: boolean) {
+  pending = state;
+}
 
 function createProxy() {
   const PORT = 8321;
@@ -16,11 +23,17 @@ function createProxy() {
   // Http Proxy
   app.use(cors());
   app.get('/', async (_, res) => {
-    const result = await postMessage();
-    res.json(result);
+    res.json({ success: true });
   });
 
-  let pending = false;
+  app.get('/node', async (_, res) => {
+    await HardwareSDK.init({ debug: true });
+    console.log('HardwareSDK initialized success, version: ', getSDKVersion());
+    const response = HardwareSDK.getFeatures('Bixin22080100009');
+    res.json(response);
+  });
+
+  setPending(false);
   // eslint-disable-next-line consistent-return
   app.post('/', bodyParse.json(), async (req, res) => {
     console.log(req.body);
@@ -36,7 +49,7 @@ function createProxy() {
       });
     }
 
-    pending = true;
+    setPending(true);
 
     try {
       const result = await postMessage(req.body);
@@ -93,5 +106,5 @@ function createProxy() {
 
 export default {
   createProxy,
-  setMainWindow,
+  setPending,
 };

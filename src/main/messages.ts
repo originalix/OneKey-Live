@@ -22,12 +22,16 @@ async function postMessage(params?: any) {
   const promise = createDeferred<IReceiveMessage, number>();
   const id = getMessageId();
   promise.id = id;
+
+  mainWindow.show();
+  setImmediate(() => mainWindow.focus());
   mainWindow.webContents.send('hardware-sdk', {
     id,
     messageType: 'Send',
     payload: { ...params },
   } as ISendMessage);
   promiseMap[id] = promise;
+
   const response = await promise.promise;
   return response;
 }
