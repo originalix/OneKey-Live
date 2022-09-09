@@ -36,7 +36,6 @@ function createProxy() {
   setPending(false);
   // eslint-disable-next-line consistent-return
   app.post('/', bodyParse.json(), async (req, res) => {
-    console.log(req.body);
     if (!req.body) return res.sendStatus(400);
 
     if (pending) {
@@ -112,9 +111,11 @@ function createProxy() {
 
         try {
           const result = await postMessage(data);
-          ws.send(JSON.stringify(result));
-        } catch (err) {
-          ws.send(JSON.stringify({ success: false, error: err }));
+          ws.send(JSON.stringify({ ...result, messageId: data.messageId }));
+        } catch (err: unknown) {
+          ws.send(
+            JSON.stringify({ success: false, error: (err as Error).message })
+          );
         } finally {
           wsBusyIndex = 0;
         }

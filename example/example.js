@@ -40,7 +40,7 @@ async function evmGetAddress() {
   alert(JSON.stringify(response));
 }
 
-async function makeApp(useHttpBridge = false) {
+async function makeApp(useHttpBridge = true) {
   try {
     try {
       if (useHttpBridge) {
@@ -91,6 +91,10 @@ async function checkHttpBridgeLoop(i) {
   });
 }
 
+/**
+ * Socket Transport
+ *
+ */
 async function checkWebSocketBridge() {
   return new Promise((resolve, reject) => {
     let connected = false;
@@ -132,11 +136,56 @@ async function checkWebSocketBridgeLoop(i) {
   });
 }
 
+let messageId = 0;
+async function sendSocketMessage(params) {
+  return new Promise((resolve, reject) => {
+    messageId += 1;
+    const connected = false;
+    const socket = new WebSocket(SOCKET_BRIDGE_URL);
+    socket.addEventListener('open', () => {
+      socket.send(JSON.stringify({ ...params, messageId }));
+    });
+    socket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.messageType === 'Receive' && data.messageId === messageId) {
+          resolve(data);
+          socket.close();
+        }
+      } catch (e) {
+        console.log('parse error: ', e);
+      }
+    };
+
+    socket.onclose = () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+      console.log('transport socket closed');
+    };
+
+    const timer = setTimeout(() => {
+      socket.close();
+    }, 30000);
+  });
+}
+
 async function getFeaturesBySocket() {
   await makeApp();
-  console.log(1);
-  // const response = await request({ method: 'getFeatures' });
-  // alert(JSON.stringify(response));
+  const response = await sendSocketMessage({ method: 'getFeatures' });
+  alert(JSON.stringify(response));
+}
+
+async function evmGetAddressBySocket() {
+  await makeApp();
+  const response = await sendSocketMessage({
+    method: 'evmGetAddress',
+    params: {
+      path: "m/44'/60'/0'/0/0",
+      showOnOneKey: true,
+    },
+  });
+  alert(JSON.stringify(response));
 }
 
 function delay(ms) {

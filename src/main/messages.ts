@@ -19,6 +19,7 @@ const getMessageId = () => {
 const promiseMap: Record<number, Deferred<any>> = {};
 
 async function postMessage(params?: any) {
+  console.log('[postMessage - call]: ', JSON.stringify(params));
   const promise = createDeferred<IReceiveMessage, number>();
   const id = getMessageId();
   promise.id = id;
@@ -33,6 +34,7 @@ async function postMessage(params?: any) {
   promiseMap[id] = promise;
 
   const response = await promise.promise;
+  console.log('[postMessage - receive]: ', JSON.stringify(response));
   return response;
 }
 
