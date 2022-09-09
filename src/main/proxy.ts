@@ -81,21 +81,42 @@ function createProxy() {
       };
 
       ws.on('close', onClose);
-      ws.on('message', (message, isBinary) => {
+      ws.on('message', async (message, isBinary) => {
         if (destroyed) return;
-        const data = isBinary ? message : message.toString();
-        console.log(data);
+        if (wsBusyIndex) {
+          ws.send(
+            JSON.stringify({
+              success: true,
+              error: 'WebSocket is busy (previous session not closed)',
+            })
+          );
+          ws.close();
+          destroyed = true;
+          return;
+        }
+
+        let data: any = isBinary ? message : message.toString();
+
         if (data === 'ping') {
           ws.send('pong');
           return;
         }
-        ws.send(
-          JSON.stringify({
-            type: 'opened',
-          })
-        );
-        if (wsBusyIndex !== index) {
-          console.warn('ignoring message because busy transport');
+
+        try {
+          data = JSON.parse(data);
+        } catch (e) {
+          console.log('json parse error: ', e);
+        }
+
+        wsBusyIndex = index;
+
+        try {
+          const result = await postMessage(data);
+          ws.send(JSON.stringify(result));
+        } catch (err) {
+          ws.send(JSON.stringify({ success: false, error: err }));
+        } finally {
+          wsBusyIndex = 0;
         }
       });
     } catch (err) {
