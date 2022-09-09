@@ -69,7 +69,10 @@ function createProxy() {
     const index = ++wsIndex;
 
     try {
+      let destroyed = false;
       const onClose = () => {
+        if (destroyed) return;
+        destroyed = true;
         if (wsBusyIndex) {
           wsBusyIndex = 0;
         }
@@ -78,7 +81,14 @@ function createProxy() {
       };
 
       ws.on('close', onClose);
-      ws.on('message', () => {
+      ws.on('message', (message, isBinary) => {
+        if (destroyed) return;
+        const data = isBinary ? message : message.toString();
+        console.log(data);
+        if (data === 'ping') {
+          ws.send('pong');
+          return;
+        }
         ws.send(
           JSON.stringify({
             type: 'opened',
@@ -90,6 +100,7 @@ function createProxy() {
       });
     } catch (err) {
       console.log('websocket error', err);
+      ws.close();
     }
   });
 
