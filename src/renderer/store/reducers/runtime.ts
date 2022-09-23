@@ -3,12 +3,12 @@ import { KnownDevice } from '@onekeyfe/hd-core';
 
 type InitialState = {
   device: KnownDevice | null;
-  methodState: 'empty' | 'processing' | 'success' | 'failed'
+  methodState: 'empty' | 'processing' | 'success' | 'failed';
 };
 
 const initialState: InitialState = {
   device: null,
-  methodState: 'empty'
+  methodState: 'empty',
 };
 
 export const runtimeSlice = createSlice({
@@ -19,8 +19,8 @@ export const runtimeSlice = createSlice({
       state.device = action.payload;
     },
     setMethodState(state, action: PayloadAction<InitialState['methodState']>) {
-      state.methodState = action.payload
-    }
+      state.methodState = action.payload;
+    },
   },
 });
 
