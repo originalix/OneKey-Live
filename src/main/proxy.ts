@@ -3,8 +3,6 @@ import express from 'express';
 import bodyParse from 'body-parser';
 import cors from 'cors';
 import WebSocket from 'ws';
-import HardwareSDK from '@onekeyfe/hd-common-connect-sdk';
-import { getSDKVersion } from '@onekeyfe/hd-core';
 import { postMessage, listenRendererMessages } from './messages';
 
 listenRendererMessages();
@@ -24,13 +22,6 @@ function createProxy() {
   app.use(cors());
   app.get('/', async (_, res) => {
     res.json({ success: true });
-  });
-
-  app.get('/node', async (_, res) => {
-    await HardwareSDK.init({ debug: true });
-    console.log('HardwareSDK initialized success, version: ', getSDKVersion());
-    const response = HardwareSDK.getFeatures('Bixin22080100009');
-    res.json(response);
   });
 
   setPending(false);
